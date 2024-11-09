@@ -12,21 +12,9 @@ pip install -r requirements.txt
 
 ## Data
 
-Data is provided for *Escherichia coli K12 MG1655* (NC_000913) under the `data/` directory.
-
-For a detailed description per dataset, see the `load_data` function docstrings under `main.py`.
-
-### Interactions data
-Data source: [sInterBase](https://academic.oup.com/bioinformatics/article/39/4/btad172/7115836).
-
-Train and test datasets, including the predicted duplex and computed features.
-
-### RNA data
-Data source: [EcoCyc](https://ecocyc.org/).
-
-sRNA and mRNA data (used by ***GraphRNA***).
-
-
+Interactions data is provided for *Escherichia coli K12 MG1655* (NC_000913) in [Zenodo](https://zenodo.org/records/14030380)  under the `data/datasets` directory.
+HT and LT datasets, including the predicted duplex, computed features and environmental conditions info.
+Original source: [sInterBase](https://academic.oup.com/bioinformatics/article/39/4/btad172/7115836)
 
 ## Methods application
 
