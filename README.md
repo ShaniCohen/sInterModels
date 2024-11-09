@@ -15,7 +15,8 @@ pip install -r requirements.txt
 Interactions data is provided for *Escherichia coli K12 MG1655* (NC_000913) in [Zenodo](https://zenodo.org/records/14030380)  under the `data/datasets` directory.
 
 We provide the complete HT and LT datasets, including the predicted duplex, computed features and environmental conditions info.
-Original source: [sInterBase](https://academic.oup.com/bioinformatics/article/39/4/btad172/7115836)
+
+Original data source: [sInterBase](https://academic.oup.com/bioinformatics/article/39/4/btad172/7115836)
 
 ## Methods application
 
