@@ -5,14 +5,14 @@ import random
 import itertools
 from sklearn.utils import shuffle
 from typing import Dict, List
-from models.graph_rna import GraphRNA
+from models_old.graph_rna import GraphRNA
 import torch
 import torch.nn.functional as F
 from torch_geometric.data import HeteroData
 import torch_geometric.transforms as T
-from models_handlers.model_handlers_utils import calc_binary_classification_metrics_using_y_score, \
+from models_handlers_old.model_handlers_utils import calc_binary_classification_metrics_using_y_score, \
     get_stratified_cv_folds_for_unique
-from utils.utils_general import order_df, split_df_samples
+from utils_old.utils_general import order_df, split_df_samples
 import logging
 logger = logging.getLogger(__name__)
 

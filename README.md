@@ -32,9 +32,9 @@ sRNA and mRNA data (used by ***GraphRNA***).
 
 ### Training and evaluation
 ```python
-from models_handlers.graph_rna_model_handler import GraphRNAModelHandler
-from models_handlers.xgboost_model_handler import XGBModelHandler
-from models_handlers.rf_model_handler import RFModelHandler
+from models_handlers_old.graph_rna_model_handler import GraphRNAModelHandler
+from models_handlers_old.xgboost_model_handler import XGBModelHandler
+from models_handlers_old.rf_model_handler import RFModelHandler
 
 # 1 - load data (see load_data implementation in main.py)  
 data_path = "/sise/home/shanisa/GraphRNA/data"
