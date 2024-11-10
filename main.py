@@ -31,16 +31,12 @@ def main():
     test_predictions = train_and_evaluate(model_h=graph_rna, train=train, test=test, **kwargs)
 
     # ----- kGraphRNA -----
-    # 1 - extract 3-mer features
-
-    # 2 - train and test
+    # 1 - train and test
     k_graph_rna = kGraphRNAModelHandler()
     test_predictions = train_and_test(model_h=k_graph_rna, train=train_example, test=test_example)
 
     # ----- Decision Forests - sInterRF and sInterXGB -----
-    # 1 - extract local interaction and 3-mer-diff features
-
-    # 2 - train and test
+    # 1 - train and test
     # -- sInterRF
     rf = RFModelHandler()
     test = test_filtered
