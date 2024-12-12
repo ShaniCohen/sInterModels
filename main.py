@@ -17,12 +17,12 @@ def main():
     # ----- configuration
     data_path = "/sise/home/shanisa/GraphRNA/data"
     data_path_2 = "/sise/home/shanisa/data_sInterModels"
-    outputs_path = "/sise/home/shanisa/data_sInterModels/outputs"
 
     # ----- load data -----
     train, test_complete, test_filtered, kwargs = load_data(data_path=data_path)
-    # Note: these are small example datasets demonstrating the E2E flow
-    rna_data, train_example, test_example = load_rna_and_inter_data(data_path=data_path_2)
+    # Note: these are small example datasets (train and test) demonstrating the E2E flow
+    train_example, test_example, srna_data, mrna_data, srna_acc_col, mrna_acc_col = \
+        load_rna_and_inter_data(data_path=data_path_2)
 
     # ----- GraphRNA -----
     # 1 - train and test
@@ -33,10 +33,14 @@ def main():
     # ----- kGraphRNA -----
     # 1 - train and test
     k_graph_rna = kGraphRNAModelHandler()
-    test_predictions = train_and_test(model_h=k_graph_rna, train=train_example, test=test_example)
+    test_predictions = train_and_test_graph_model(model_h=k_graph_rna, train=train_example, test=test_example,
+                                                  srna_data=srna_data, mrna_data=mrna_data, srna_acc_col=srna_acc_col,
+                                                  mrna_acc_col=mrna_acc_col)
 
     # ----- Decision Forests - sInterRF and sInterXGB -----
-    # 1 - train and test
+    # 1 - extract local interaction and 3-mer-diff features
+
+    # 2 - train and test
     # -- sInterRF
     rf = RFModelHandler()
     test = test_filtered
@@ -97,58 +101,58 @@ def load_data(data_path: str):
     return train_fragments, test_complete, test_filtered, kwargs
 
 
-def load_rna_and_inter_data(data_path: str) -> (Dict[str, object], pd.DataFrame, pd.DataFrame):
+def load_rna_and_inter_data(data_path: str) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, str, str):
     """
     :param data_path: str
     :return:
-    rna_data - dict in the following format:
-        {
-            'srna_eco': pd.DataFrame,
-            'mrna_eco': pd.DataFrame,
-            'se_acc_col': str (the column in srna_eco containing unique id per sRNA),
-            'me_acc_col': str (the column in mrna_eco containing unique id per mRNA)
-        }
     """
-    # 1 - load sRNA and mRNA data
+    # 1 - load interactions datasets for example
+    train_example, test_example = _load_interactions_data(data_path=data_path)
+    # 2 - load sRNA and mRNA data
     """
-    srna_eco: includes 94 unique sRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
-    mrna_eco: includes 4300 unique mRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
+    srna_data: includes 94 unique sRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
+    mrna_data: includes 4300 unique mRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
 
     Note: sRNA/mRNA accession ids in the RNA data must match the accession ids in the interactions datasets.
     """
-    srna_eco, mrna_eco, srna_eco_accession_id_col, mrna_eco_accession_id_col = _load_rna_data(data_path=data_path)
-    rna_data = {
-        'srna_eco': srna_eco,
-        'mrna_eco': mrna_eco,
-        'se_acc_col': srna_eco_accession_id_col,
-        'me_acc_col': mrna_eco_accession_id_col
-    }
-    # 2 - load interactions datasets for example
-    train_example, test_example = _load_interactions_data(data_path=data_path)
+    srna_data, mrna_data, srna_accession_id_col, mrna_accession_id_col = _load_rna_data(data_path=data_path)
+    # 3 - asserts
+    # 3.1 - sRNA acc col
+    assert srna_accession_id_col in srna_data.columns.values
+    assert srna_accession_id_col in train_example.columns.values
+    assert srna_accession_id_col in test_example.columns.values
+    # 3.2 - mRNA acc col
+    assert mrna_accession_id_col in mrna_data.columns.values
+    assert mrna_accession_id_col in train_example.columns.values
+    assert mrna_accession_id_col in test_example.columns.values
 
-    return rna_data, train_example, test_example
+    return train_example, test_example, srna_data, mrna_data, srna_accession_id_col, mrna_accession_id_col
 
 
-def train_and_test(model_h, train: pd.DataFrame, test: pd.DataFrame, **kwargs) -> \
-        (Dict[int, pd.DataFrame], pd.DataFrame):
+def train_and_test_graph_model(model_h, train: pd.DataFrame, test: pd.DataFrame, srna_data: pd.DataFrame,
+                               mrna_data: pd.DataFrame, srna_acc_col: str, mrna_acc_col: str,) -> pd.DataFrame:
     """
-    Returns
-    -------
-    test_predictions_df - pd.DataFrame including the following information:
+    :param model_h:
+    :param train:
+    :param test:
+    :param srna_data: pd.DataFrame
+    :param mrna_data: pd.DataFrame
+    :param srna_acc_col: str - the column in train, test and srna_data containing unique id per sRNA
+    :param mrna_acc_col: str - the column in train, test and mrna_data containing unique id per mRNA
+
+    :return:
+        test_predictions_df - pd.DataFrame including the following information:
                           sRNA accession id, mRNA accession id, interaction label (y_true),
                           model's prediction score (y_score OR y_graph_score), metadata columns.
     """
     # 1 - define model args
     model_args = model_h.get_model_args()
+    kwargs = {}
     # 2 - train and test
-    dummy_x_train, dummy_x_val = pd.DataFrame(), pd.DataFrame()  # irrelevant when using unique interactions
-    dummy_y_train, dummy_y_val = list(), list()
-    dummy_meta_train, dummy_meta_val = pd.DataFrame(), pd.DataFrame()
     scores, predictions, training_history, train_val_data, shap_args = \
-        model_h.train_and_test(X_train=dummy_x_train, y_train=dummy_y_train, X_test=dummy_x_val,
-                               y_test=dummy_y_val, model_args=model_args, metadata_train=dummy_meta_train,
-                               metadata_test=dummy_meta_val, unq_train=train, unq_test=test,
-                               train_neg_sampling=False, **kwargs)
+        model_h.train_and_test(model_args=model_args, unq_train=train, unq_test=test,
+                               srna_data=srna_data, mrna_data=mrna_data, srna_acc_col=srna_acc_col,
+                               mrna_acc_col=mrna_acc_col, **kwargs)
     test_predictions_df = predictions['out_test_pred']
 
     return test_predictions_df

@@ -21,27 +21,27 @@ def _load_interactions_data(data_path: str, srna_accession_id_col: str = "sRNA_E
     return train_example, test_example
 
 
-def _load_rna_data(data_path: str, srna_accession_id_col: str = "EcoCyc_accession_id",
-                   mrna_accession_id_col: str = "EcoCyc_accession_id"):
+def _load_rna_data(data_path: str, srna_accession_id_col: str = "sRNA_EcoCyc_accession_id",
+                   mrna_accession_id_col: str = "mRNA_EcoCyc_accession_id"):
     """
-    srna_eco: includes 94 unique sRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
-    mrna_eco: includes 4300 unique mRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
+    srna_data: includes 94 unique sRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
+    mrna_data: includes 4300 unique mRNAs of Escherichia coli K12 MG1655 (NC_000913) from EcoCyc.
 
     :return:
-    srna_eco - pd.DataFrame
-    srna_accession_id_col - str: the column in srna_eco containing unique id per sRNA
-    mrna_eco - pd.DataFrame
-    mrna_accession_id_col - str: the column in mrna_eco containing unique id per mRNA
+    srna_data - pd.DataFrame
+    srna_accession_id_col - str: the column in srna_data containing unique id per sRNA
+    mrna_data - pd.DataFrame
+    mrna_accession_id_col - str: the column in mrna_data containing unique id per mRNA
     """
     # sRNA data from EcoCyc
-    srna_eco = read_df(join(data_path, "DATA_srna_eco.csv"))
-    assert srna_accession_id_col in srna_eco.columns.values, f"{srna_accession_id_col} not in df columns"
+    srna_data = read_df(join(data_path, "DATA_srna_eco.csv"))
+    assert srna_accession_id_col in srna_data.columns.values, f"{srna_accession_id_col} not in df columns"
 
     # mRNA data from EcoCyc
-    mrna_eco = read_df(join(data_path, "DATA_mrna_eco.csv"))
-    assert mrna_accession_id_col in mrna_eco.columns.values, f"{mrna_accession_id_col} not in df columns"
+    mrna_data = read_df(join(data_path, "DATA_mrna_eco.csv"))
+    assert mrna_accession_id_col in mrna_data.columns.values, f"{mrna_accession_id_col} not in df columns"
 
-    return srna_eco, mrna_eco, srna_accession_id_col, mrna_accession_id_col
+    return srna_data, mrna_data, srna_accession_id_col, mrna_accession_id_col
 
 
 class DataHandler(object):
